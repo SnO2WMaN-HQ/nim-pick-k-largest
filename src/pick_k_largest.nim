@@ -1,4 +1,5 @@
 import std/algorithm
+import sequtils
 
 proc select(x: seq[int], k: int, order: SortOrder = SortOrder.Descending): int =
   if x.len <= 9:
@@ -14,10 +15,20 @@ proc select(x: seq[int], k: int, order: SortOrder = SortOrder.Descending): int =
       else:
         slice[j] = x[x.len - 1]
 
-    var se = sorted(slice, system.cmp[int], order)
-    slices.add(se)
+    sort(slice, system.cmp[int], order)
+    slices.add(slice)
 
-  echo slices
-  return x.len
+  var
+    y = map(slices, proc (x: array[5, int]): int = x[2])
+    a = select(y, y.len div 2, order)
+    l = filter(x, proc (n: int): bool = a < n)
+    s = filter(x, proc (n: int): bool = a > n)
 
-discard @[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 23].select(3)
+  if k <= l.len:
+    return select(l, k)
+  elif l.len < k - 1:
+    return select(s, k-l.len-1)
+  else:
+    return a
+
+echo select(toSeq(1..1000), 2)
